@@ -15,9 +15,9 @@ struct path {
 };
 
 struct motorspeeds {
-  int leftSpeed;
-  int rightSpeed;
-}
+  int leftMotorSpeed;
+  int rightMotorSpeed;
+};
 
 // path array
 path paths[] = {
@@ -41,11 +41,9 @@ void setup() {
   rightMotor->run(FORWARD);
 }
 
-motorspeeds chooseSpeed(path p) {
-  int pos = p.pos;
+motorspeeds chooseSpeeds(path p) {
+  int pos = p.direction;
   int speed_ = p.pace;
-  int leftMotorDirection = FORWARD;
-  int rightMotorDirection = FORWARD;
   
   int leftMotorSpeed = 0;
   int rightMotorSpeed = 0;
@@ -71,6 +69,8 @@ motorspeeds chooseSpeed(path p) {
 void driveMotors(motorspeeds speeds) {
   int leftMotorSpeed = speeds.leftMotorSpeed;
   int rightMotorSpeed = speeds.rightMotorSpeed;
+  int leftMotorDirection = FORWARD;
+  int rightMotorDirection = FORWARD;
   
   Serial.print(leftMotorSpeed);
   Serial.print(",");
