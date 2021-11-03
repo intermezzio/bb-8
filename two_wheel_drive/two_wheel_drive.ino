@@ -6,10 +6,6 @@ Adafruit_MotorShield AFMS = Adafruit_MotorShield();
 Adafruit_DCMotor *leftMotor = AFMS.getMotor(2);
 Adafruit_DCMotor *rightMotor = AFMS.getMotor(3);
 
-// define pins
-const int leftIRPin = A0;
-const int rightIRPin = A1;
-
 int speed_ = 6;
 
 struct path {
@@ -18,19 +14,20 @@ struct path {
   int pace;
 };
 
+struct motorspeeds {
+  int leftSpeed;
+  int rightSpeed;
+}
+
 // path array
-path path1 = {1, 3000, 6};
-//path path2 =;
 path paths[] = {
-  path1,
-  {-1, 2000, 6}
+  {1, 3000, 6},
+  {-1, 2000, 6},
+  {1, 1000, 0}
 };
 int num_paths = sizeof(paths)/sizeof(paths[0]);
 
 void setup() {
-  pinMode(leftIRPin, INPUT);
-  pinMode(rightIRPin, INPUT);
-
   Serial.begin(9600);
   
   if (!AFMS.begin()) {         // create with the default frequency 1.6KHz
@@ -43,25 +40,10 @@ void setup() {
   leftMotor->run(FORWARD);
   rightMotor->run(FORWARD);
 }
-char processIRData(int leftIR, int rightIR) {
-  bool leftDetect = true;
-  bool rightDetect = true;
-  if(!leftDetect && !rightDetect) {
-    return 'g';
-  } else if(rightDetect && !leftDetect) {
-    // correct by moving right
-    return 'l';
-  } else if(leftDetect && !rightDetect) {
-    // correct by moving left
-    return 'r';
-  } else {
-    // should not reach this state
-    // both see the tape
-    return 'x';
-  }
-}
 
-void driveMotors(int pos, int speed_) {
+motorspeeds chooseSpeed(path p) {
+  int pos = p.pos;
+  int speed_ = p.pace;
   int leftMotorDirection = FORWARD;
   int rightMotorDirection = FORWARD;
   
@@ -82,6 +64,14 @@ void driveMotors(int pos, int speed_) {
   leftMotorSpeed *= speed_;
   rightMotorSpeed *= speed_;
 
+  motorspeeds newSpeed = {leftMotorSpeed, rightMotorSpeed};
+  return newSpeed;
+}
+
+void driveMotors(motorspeeds speeds) {
+  int leftMotorSpeed = speeds.leftMotorSpeed;
+  int rightMotorSpeed = speeds.rightMotorSpeed;
+  
   Serial.print(leftMotorSpeed);
   Serial.print(",");
   Serial.println(rightMotorSpeed);
@@ -130,8 +120,11 @@ void loop() {
   // for element in list of paths
   for(int i = 0; i < num_paths; i++) {
     path p = paths[i];
-    driveMotors(p.direction, p.pace);
+    motorspeeds s = chooseSpeeds(p);
+    driveMotors(s);
     delay(p.duration);
   }
+  leftMotor->run(RELEASE);
+  rightMotor->run(RELEASE);
   while(true) {}
 }
