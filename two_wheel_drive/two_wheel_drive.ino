@@ -8,22 +8,23 @@ Adafruit_DCMotor *rightMotor = AFMS.getMotor(3);
 
 int speed_ = 6;
 
-struct path {
-  float direction;
-  int duration;
-  int pace;
-};
-
 struct motorspeeds {
   int leftMotorSpeed;
   int rightMotorSpeed;
 };
 
+struct path {
+//  float direction;
+  int duration;
+  motorspeeds pace;
+};
+
+
 // path array
 path paths[] = {
-  {1, 3000, 6},
-  {-1, 2000, 6},
-  {1, 1000, 0}
+  {3000, {24, 24}},
+  {2000, {-24, -24}},
+  {1000, {0, 0}}
 };
 int num_paths = sizeof(paths)/sizeof(paths[0]);
 
@@ -41,6 +42,7 @@ void setup() {
   rightMotor->run(FORWARD);
 }
 
+/*
 motorspeeds chooseSpeeds(path p) {
   int pos = p.direction;
   int speed_ = p.pace;
@@ -65,6 +67,7 @@ motorspeeds chooseSpeeds(path p) {
   motorspeeds newSpeed = {leftMotorSpeed, rightMotorSpeed};
   return newSpeed;
 }
+*/
 
 void driveMotors(motorspeeds speeds) {
   int leftMotorSpeed = speeds.leftMotorSpeed;
@@ -120,8 +123,8 @@ void loop() {
   // for element in list of paths
   for(int i = 0; i < num_paths; i++) {
     path p = paths[i];
-    motorspeeds s = chooseSpeeds(p);
-    driveMotors(s);
+//    motorspeeds s = chooseSpeeds(p);
+    driveMotors(p.pace);
     delay(p.duration);
   }
   leftMotor->run(RELEASE);
