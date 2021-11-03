@@ -3,8 +3,8 @@
 // initialize motor shield
 Adafruit_MotorShield AFMS = Adafruit_MotorShield();
 // define motors
-Adafruit_DCMotor *leftMotor = AFMS.getMotor(2);
-Adafruit_DCMotor *rightMotor = AFMS.getMotor(3);
+Adafruit_DCMotor *leftMotor = AFMS.getMotor(3);
+Adafruit_DCMotor *rightMotor = AFMS.getMotor(4);
 
 int speed_ = 6;
 
@@ -22,8 +22,8 @@ struct path {
 
 // path array
 path paths[] = {
-  {3000, {24, 24}},
-  {2000, {-24, -24}},
+  {5000, {100, 100}},
+  {5000, {-100, -100}},
   {1000, {0, 0}}
 };
 int num_paths = sizeof(paths)/sizeof(paths[0]);
