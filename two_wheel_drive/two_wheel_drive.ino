@@ -1,4 +1,7 @@
 #include <Adafruit_MotorShield.h>
+#include <SoftwareSerial.h>
+
+SoftwareSerial altSerial(2,3); // RX, TX
 
 // initialize motor shield
 Adafruit_MotorShield AFMS = Adafruit_MotorShield();
@@ -19,11 +22,10 @@ struct path {
   motorspeeds pace;
 };
 
-
 // path array
 path paths[] = {
-  {5000, {100, 100}},
-  {5000, {-100, -100}},
+  {5000, {75, 75}},
+  {5000, {-75, -75}},
   {1000, {0, 0}}
 };
 int num_paths = sizeof(paths)/sizeof(paths[0]);
@@ -37,6 +39,9 @@ void setup() {
     }
   }
   Serial.println("Motor Shield found.");
+
+  altSerial.begin(9600);
+  altSerial.println("Test altSerial message");
   
   leftMotor->run(FORWARD);
   rightMotor->run(FORWARD);
@@ -69,6 +74,35 @@ motorspeeds chooseSpeeds(path p) {
 }
 */
 
+void getInput() {
+  if(altSerial.available() == 0) {
+    return;
+  }
+  char direction_ = altSerial.read();
+  switch(direction_) {
+    case 'w':
+      driveMotors({5,5});
+      break;
+    case 'a':
+      driveMotors({3,5});
+      break;
+    case 's':
+      driveMotors({-5,-5});
+      break;
+    case 'd':
+      driveMotors({5,3});
+      break;
+    default:
+      return;
+      break;
+  }
+  return;
+}
+
+String altDelay(int ms) {
+  return "";
+}
+
 void driveMotors(motorspeeds speeds) {
   int leftMotorSpeed = speeds.leftMotorSpeed;
   int rightMotorSpeed = speeds.rightMotorSpeed;
@@ -97,33 +131,13 @@ void driveMotors(motorspeeds speeds) {
   return;
 }
 
-void getInput() {
-  if(Serial.available() == 0) {
-    return;
-  }
-  int newSpeed = Serial.parseInt();
-  if(newSpeed < 0 || newSpeed > 32) {
-    // invalid data
-    Serial.print("Invalid speed ");
-    Serial.println(newSpeed);
-    return;
-  }
-  if(newSpeed == 0) {
-    Serial.println("Terminating code");
-    // end code by trapping in a while loop
-    leftMotor->run(RELEASE);
-    rightMotor->run(RELEASE);
-    while(true) {}
-  }
-  speed_ = newSpeed;
-  return;
-}
+
 
 void loop() {
   // for element in list of paths
   for(int i = 0; i < num_paths; i++) {
     path p = paths[i];
-//    motorspeeds s = chooseSpeeds(p);
+  // motorspeeds s = chooseSpeeds(p);
     driveMotors(p.pace);
     delay(p.duration);
   }
