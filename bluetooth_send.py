@@ -13,13 +13,20 @@ ser.baudrate = baud
 ser.port = port 
 
 # # Uncomment When Connected
-# ser.open()
+ser.open()
 
 while True:
+    # cmd = input("Enter username:")
     cmd = keyboard.read_key()
-    # print(cmd)
 
-    ser.write(cmd) #Writes the keystroke to the serial
+    print(cmd)
+    # ser.write(bin(cmd))
+
+    cmd += "\r\n"
+
+    ser.write(cmd.encode())
+
+    # ser.write(cmd.encode('ascii') + b'13' + b'10') #Writes the keystroke to the serial
     time.sleep(.03)  # Waits for .03 seconds
-    out = ser.read() # reads what is in the serial
-    print('Receiving...'+out) #prints what it is receivingj
+    out = ser.read().decode() # reads what is in the serial
+    print('Receiving...'+out) #prints what it is receiving
