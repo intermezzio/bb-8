@@ -26,27 +26,33 @@ void setup() {
 }
 
 void loop() {
-  get_input() 
+  get_input();
 }
 
 void get_input() {
   if (altSerial.available()){
     char ch = altSerial.read();                            // read the first available character
-
-    if (ch == '\r'){                                    // if it is the end of the message
+    Serial.print("Received '");
+    Serial.print(ch);
+    Serial.println("'");
+    Serial.println((int)ch);
+    
+    if (ch == '\r' || ch == '\n'){                                    // if it is the end of the message
       parse_command();                                  // call parse_command
       command = "";                                     // reset the command string
     }
-    else{
+    else if (ch != '\n' && ch != '\r'){
       command += ch;                                    // otherwise, append the character to the command string until the command is complete
     }
   }
 }
 
 void parse_command() {
-  uint16_t val;                                         // general variable to store a value that is sent through the serial connection
-
-  if (command.equals("w")) {
+  uint16_t val; // general variable to store a value that is sent through the serial connection
+  Serial.print("Parsing ");
+  char command_char = command.charAt(0);
+  Serial.println(command_char);
+  if (command_char  == 'w') {
     motorspeeds forward_command = {50, 50};
     driveMotors(forward_command);
     Serial.print(forward_command.leftMotorSpeed);
@@ -54,25 +60,31 @@ void parse_command() {
     Serial.print(forward_command.rightMotorSpeed);
     Serial.print("\r\n");
   } 
-  else if (command.equals("a")) {
+  else if (command_char == 'a') {
     motorspeeds left_command = {30, 50};
     driveMotors(left_command);
-    Serial.print(left_command.leftMotorSpeed, left_command.rightMotorSpeed);
+    Serial.print(left_command.leftMotorSpeed);
+    Serial.print(",");
+    Serial.print(left_command.rightMotorSpeed);
     Serial.print("\r\n");
   }
-  else if (command.equals("s")) {
+  else if (command_char == 's') {
     motorspeeds back_command = {-50, -50};
     driveMotors(back_command);
-    Serial.print(back_command.leftMotorSpeed, back_command.rightMotorSpeed);
+    Serial.print(back_command.leftMotorSpeed);
+    Serial.print(",");
+    Serial.print(back_command.rightMotorSpeed);
     Serial.print("\r\n");
   }
-  else if (command.equals("d")) {
+  else if (command_char == 'd') {
     motorspeeds right_command = {50, 30};
     driveMotors(right_command);
-    Serial.print(right_command.leftMotorSpeed, right_command.rightMotorSpeed);
+    Serial.print(right_command.leftMotorSpeed);
+    Serial.print(",");
+    Serial.print(right_command.rightMotorSpeed);
     Serial.print("\r\n");
   }
-  else if (command.equals("esc")) {
+  else if (command_char == 'e') {
     leftMotor->run(RELEASE);
     rightMotor->run(RELEASE);
   }
