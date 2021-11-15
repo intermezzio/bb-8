@@ -9,98 +9,83 @@ Adafruit_MotorShield AFMS = Adafruit_MotorShield();
 Adafruit_DCMotor *leftMotor = AFMS.getMotor(3);
 Adafruit_DCMotor *rightMotor = AFMS.getMotor(4);
 
-int speed_ = 6;
+String command = "";                                    // commands from the Python command line will be collected and parsed here
 
 struct motorspeeds {
   int leftMotorSpeed;
   int rightMotorSpeed;
 };
 
-struct path {
-//  float direction;
-  int duration;
-  motorspeeds pace;
-};
-
-// path array
-path paths[] = {
-  {5000, {75, 75}},
-  {5000, {-75, -75}},
-  {1000, {0, 0}}
-};
-int num_paths = sizeof(paths)/sizeof(paths[0]);
-
 void setup() {
   Serial.begin(9600);
-  
-  if (!AFMS.begin()) {         // create with the default frequency 1.6KHz
-    if (!AFMS.begin(1000)) {  // OR with a different frequency, say 1KHz
-      Serial.println("Could not find Motor Shield. Check wiring.");
-    }
-  }
-  Serial.println("Motor Shield found.");
-
+  AFMS.begin();
   altSerial.begin(9600);
-  altSerial.println("Test altSerial message");
-  
+
   leftMotor->run(FORWARD);
   rightMotor->run(FORWARD);
 }
 
-/*
-motorspeeds chooseSpeeds(path p) {
-  int pos = p.direction;
-  int speed_ = p.pace;
-  
-  int leftMotorSpeed = 0;
-  int rightMotorSpeed = 0;
-  switch(pos) {
-    case 1:
-      leftMotorSpeed = 4;
-      rightMotorSpeed = 4;
-      break;
-    case -1:
-      leftMotorSpeed = -4;
-      rightMotorSpeed = -4;
-      break;
-    default:
-      break;
-  }
-  leftMotorSpeed *= speed_;
-  rightMotorSpeed *= speed_;
+void loop() {
+  if (Serial.available()){
+    char ch = Serial.read();                            // read the first available character
 
-  motorspeeds newSpeed = {leftMotorSpeed, rightMotorSpeed};
-  return newSpeed;
-}
-*/
-
-void getInput() {
-  if(altSerial.available() == 0) {
-    return;
-  }
-  char direction_ = altSerial.read();
-  switch(direction_) {
-    case 'w':
-      driveMotors({5,5});
-      break;
-    case 'a':
-      driveMotors({3,5});
-      break;
-    case 's':
-      driveMotors({-5,-5});
-      break;
-    case 'd':
-      driveMotors({5,3});
-      break;
-    default:
-      return;
-      break;
-  }
-  return;
+    if (ch == '\r'){                                    // if it is the end of the message
+      parse_command();                                  // call parse_command
+      command = "";                                     // reset the command string
+    }
+    else{
+      command += ch;                                    // otherwise, append the character to the command string until the command is complete
+    }
+  }  
 }
 
-String altDelay(int ms) {
-  return "";
+void get_input() {
+  if (Serial.available()){
+    char ch = Serial.read();                            // read the first available character
+
+    if (ch == '\r'){                                    // if it is the end of the message
+      parse_command();                                  // call parse_command
+      command = "";                                     // reset the command string
+    }
+    else{
+      command += ch;                                    // otherwise, append the character to the command string until the command is complete
+    }
+  }
+}
+
+void parse_command() {
+  uint16_t val;                                         // general variable to store a value that is sent through the serial connection
+
+  if (command.equals("w")) {
+    motorspeeds forward_command = {50, 50};
+    driveMotors(forward_command);
+    Serial.print(forward_command.leftMotorSpeed);
+    Serial.print(",");
+    Serial.print(forward_command.rightMotorSpeed);
+    Serial.print("\r\n");
+  } 
+  else if (command.equals("a")) {
+    motorspeeds left_command = {30, 50};
+    driveMotors(left_command);
+    Serial.print(left_command.leftMotorSpeed, left_command.rightMotorSpeed);
+    Serial.print("\r\n");
+  }
+  else if (command.equals("s")) {
+    motorspeeds back_command = {-50, -50};
+    driveMotors(back_command);
+    Serial.print(back_command.leftMotorSpeed, back_command.rightMotorSpeed);
+    Serial.print("\r\n");
+  }
+  else if (command.equals("d")) {
+    motorspeeds right_command = {50, 30};
+    driveMotors(right_command);
+    Serial.print(right_command.leftMotorSpeed, right_command.rightMotorSpeed);
+    Serial.print("\r\n");
+  }
+  else if (command.equals("esc")) {
+    leftMotor->run(RELEASE);
+    rightMotor->run(RELEASE);
+  }
 }
 
 void driveMotors(motorspeeds speeds) {
@@ -109,10 +94,6 @@ void driveMotors(motorspeeds speeds) {
   int leftMotorDirection = FORWARD;
   int rightMotorDirection = FORWARD;
   
-  Serial.print(leftMotorSpeed);
-  Serial.print(",");
-  Serial.println(rightMotorSpeed);
-
   if(leftMotorSpeed < 0) {
     leftMotorSpeed = -leftMotorSpeed;
     leftMotorDirection = BACKWARD;
@@ -129,19 +110,4 @@ void driveMotors(motorspeeds speeds) {
   rightMotor->setSpeed(rightMotorSpeed);
   
   return;
-}
-
-
-
-void loop() {
-  // for element in list of paths
-  for(int i = 0; i < num_paths; i++) {
-    path p = paths[i];
-  // motorspeeds s = chooseSpeeds(p);
-    driveMotors(p.pace);
-    delay(p.duration);
-  }
-  leftMotor->run(RELEASE);
-  rightMotor->run(RELEASE);
-  while(true) {}
 }
