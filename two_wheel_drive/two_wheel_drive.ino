@@ -79,18 +79,20 @@ void getInput() {
     return;
   }
   char direction_ = altSerial.read();
+  Serial.print("Received ");
+  Serial.println(direction_);
   switch(direction_) {
     case 'w':
-      driveMotors({5,5});
+      driveMotors({55,55});
       break;
     case 'a':
-      driveMotors({3,5});
+      driveMotors({33,55});
       break;
     case 's':
-      driveMotors({-5,-5});
+      driveMotors({-55,-55});
       break;
     case 'd':
-      driveMotors({5,3});
+      driveMotors({55,33});
       break;
     default:
       return;
@@ -134,14 +136,16 @@ void driveMotors(motorspeeds speeds) {
 
 
 void loop() {
-  // for element in list of paths
-  for(int i = 0; i < num_paths; i++) {
-    path p = paths[i];
-  // motorspeeds s = chooseSpeeds(p);
-    driveMotors(p.pace);
-    delay(p.duration);
-  }
-  leftMotor->run(RELEASE);
-  rightMotor->run(RELEASE);
-  while(true) {}
+  getInput();
+  Serial.print(".");
+//  // for element in list of paths
+//  for(int i = 0; i < num_paths; i++) {
+//    path p = paths[i];
+//  // motorspeeds s = chooseSpeeds(p);
+//    driveMotors(p.pace);
+//    delay(p.duration);
+//  }
+//  leftMotor->run(RELEASE);
+//  rightMotor->run(RELEASE);
+//  while(true) {}
 }
