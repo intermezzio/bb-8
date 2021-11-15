@@ -26,17 +26,7 @@ void setup() {
 }
 
 void loop() {
-  if (Serial.available()){
-    char ch = Serial.read();                            // read the first available character
-
-    if (ch == '\r'){                                    // if it is the end of the message
-      parse_command();                                  // call parse_command
-      command = "";                                     // reset the command string
-    }
-    else{
-      command += ch;                                    // otherwise, append the character to the command string until the command is complete
-    }
-  }  
+  get_input() 
 }
 
 void get_input() {
