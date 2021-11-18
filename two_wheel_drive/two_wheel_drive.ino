@@ -84,7 +84,7 @@ void parse_command() {
     Serial.print(right_command.rightMotorSpeed);
     Serial.print("\r\n");
   }
-  else if (command_char == 'e') {
+  else if (command_char == 'e' || command_char == 'q') {
     leftMotor->run(RELEASE);
     rightMotor->run(RELEASE);
   }

@@ -14,7 +14,7 @@ ser.baudrate = baud
 ser.port = port 
 
 debounce_time = time.time()
-debounce_int = .3
+debounce_int = .2
 # # Uncomment When Connected
 ser.open()
 
@@ -23,14 +23,15 @@ while True:
 
     if time.time() - debounce_time >= debounce_int:
         cmd = keyboard.read_key()
+        
         cmd += "\r\n"
         ser.write(cmd.encode())
 
-        print("Here")
-
-        if cmd == "esc":
+        if cmd == "q\r\n":
             ser.close()
             break
+
+        print("Here")
 
         #out = ser.readline().decode() # reads what is in the serial
 
