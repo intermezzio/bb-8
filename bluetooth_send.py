@@ -1,4 +1,4 @@
-import keyboard  
+import keyboard
 import serial
 import time
 # import time
@@ -6,12 +6,12 @@ import time
 # https://python-forum.io/thread-7935.html
 # https://www.delftstack.com/howto/python/python-detect-keypress/
 
-port = "COM4"
+port = "/dev/rfcomm1"
 baud = 9600
 
 ser = serial.Serial()
 ser.baudrate = baud
-ser.port = port 
+ser.port = port
 
 debounce_time = time.time()
 debounce_int = .3
