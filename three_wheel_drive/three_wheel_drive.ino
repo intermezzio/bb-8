@@ -36,7 +36,7 @@ void get_input() {
   if (altSerial.available()){
     char ch = altSerial.read();                            // read the first available character
     
-    if (ch == '\n'){                                    // if it is the end of the message
+    if (ch == '\r'){                                    // if it is the end of the message
       parse_command();                                  // call parse_command
       command = "";                                     // reset the command string
     }
@@ -48,7 +48,16 @@ void get_input() {
 
 // Edit this function depending on how info is sent to the arduino
 void parse_command() {
-    
+    int max_motor_speed = 255;
+    int first_comma_index = command.indexOf(',');
+    int second_comma_index = command.indexOf(',', first_comma_index + 1);
+    float front_motor_speed = command.substring(0, first_comma_index).toFloat() * max_motor_speed;
+    float left_motor_speed = command.substring(first_comma_index + 1, second_comma_index).toFloat() * max_motor_speed;
+    float right_motor_speed = command.substring(second_comma_index + 1).toFloat() * max_motor_speed;
+
+    motorspeeds update_command = {front_motor_speed, left_motor_speed, right_motor_speed};
+
+    driveMotors(update_command);
 }
 
 void driveMotors(motorspeeds speeds) {
