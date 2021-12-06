@@ -4,9 +4,10 @@
 
 from http.server import HTTPServer, BaseHTTPRequestHandler
 import json
+import serial
 
 # port number for test server
-LOCALHOST_PORT = 3000
+LOCALHOST_PORT = 0xBB8 # 3000
 
 # port for bluetooth
 BLUETOOTH_PORT = "/dev/rfcomm1" # or "COM9", etc
@@ -21,20 +22,20 @@ ser.port = BLUETOOTH_PORT
 last_command = ""
 
 class RequestHandler(BaseHTTPRequestHandler):
-    def do_GET(self):
-        try:
-            if self.path == "/last":
-                with open("." + self.path, "r") as document:
+    # def do_GET(self):
+    #     try:
+    #         if self.path == "/last":
+    #             with open("." + self.path, "r") as document:
                     
-                    self.send_response(200)
-                    self.send_header("Content-type", "text/html")
-                    self.end_headers()
-                    self.wfile.write(document.read().encode("utf-8"))
+    #                 self.send_response(200)
+    #                 self.send_header("Content-type", "text/html")
+    #                 self.end_headers()
+    #                 self.wfile.write(document.read().encode("utf-8"))
 
-        except:
-        	self.send_response(500)
-        	self.end_headers()
-        	self.wfile.write(b"500 internal server error")
+    #     except:
+    #     	self.send_response(500)
+    #     	self.end_headers()
+    #     	self.wfile.write(b"500 internal server error")
 
     def do_POST(self):
         try:
@@ -42,9 +43,9 @@ class RequestHandler(BaseHTTPRequestHandler):
                 length = int(self.headers.get("content-length"))
                 request = json.loads(self.rfile.read(length))
                 text = request["text"]
-                
-                if == "stop":
-                	ser.close()
+                print("reads")
+                if text == "stop":
+                    ser.close()
                     self.send_response(200)
                     self.end_headers()
                     self.wfile.write(b"The arduino was stopped")
@@ -54,6 +55,7 @@ class RequestHandler(BaseHTTPRequestHandler):
                     last_command = text
                     self.send_response(200)
                     self.end_headers()
+                    print("Sent", text)
                     self.wfile.write(b"The command was sent")
 
             else:
@@ -70,7 +72,7 @@ class RequestHandler(BaseHTTPRequestHandler):
         self.send_response(204)
         self.send_header("Access-Control-Allow-Origin", "*")
         self.send_header("Access-Control-Allow-Methods", "POST, OPTIONS")
-        self.send_header("Access-Control-Allow-Headers", "X-PINGOTHER, Content-Type")
+        self.send_header("Access-Control-Allow-Headers", "Authorization, X-PINGOTHER, Content-Type")
         self.send_header("Access-Control-Max-Age", "86400")
         self.send_header("Vary", "Accept-Encoding, Origin")
         self.end_headers()
@@ -78,6 +80,6 @@ class RequestHandler(BaseHTTPRequestHandler):
 
 if __name__ == "__main__":
     print("Initializing server")
-    httpd = HTTPServer(("0.0.0.0", PORT), ModelRequestHandler)
-    print("Serving on port %d" % PORT)
+    httpd = HTTPServer(("0.0.0.0", LOCALHOST_PORT), RequestHandler)
+    print("Serving on port %d" % LOCALHOST_PORT)
     httpd.serve_forever()

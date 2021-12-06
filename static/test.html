@@ -1,18 +1,18 @@
 <!DOCTYPE html>
-<!-- Adapted from https://www.instructables.com/Making-a-Joystick-With-HTML-pure-JavaScript/ -->
+<!-- Largely adapted from https://www.instructables.com/Making-a-Joystick-With-HTML-pure-JavaScript/ -->
 <html>
 <head>
     <title>
         BB-8 Controller
     </title>
     <meta name="viewport" content="user-scalable=no">
+    <link rel="stylesheet" type="text/css" href="test.css">
 </head>
-<body  style="position: fixed; font-family: 'Gill Sans', 'Gill Sans MT', Calibri, 'Trebuchet MS', sans-serif ;
-color:rgb(128, 128, 128);
-font-size: xx-large;">
-    <h1 style="text-align:center">
-        MOUSEBOT </h1>
-    <p style="text-align: center;">
+<body>
+    <h1>
+        Control BB-8
+    </h1>
+    <p>
         X: <span id="x_coordinate"> </span>
         Y: <span id="y_coordinate"> </span>
         Speed: <span id="speed"> </span> %
@@ -20,23 +20,43 @@ font-size: xx-large;">
     </p>
     <canvas id="canvas" name="game"></canvas>
     <script>
-        var connection = new WebSocket('ws://' + "192.168.4.1" + ':81/', ['arduino']);
-        connection.onopen = function () {
-            connection.send('Connect ' + new Date());
-        };
-        connection.onerror = function (error) {
-            console.log('WebSocket Error ', error);
-            alert('WebSocket Error ', error);
-        };
-        connection.onmessage = function (e) {
-            console.log('Server: ', e.data);
-        };
+        // var connection = new WebSocket('ws://' + "192.168.4.1" + ':81/', ['arduino']);
+        // connection.onopen = function () {
+        //     connection.send('Connect ' + new Date());
+        // };
+        // connection.onerror = function (error) {
+        //     console.log('WebSocket Error ', error);
+        //     alert('WebSocket Error ', error);
+        // };
+        // connection.onmessage = function (e) {
+        //     console.log('Server: ', e.data);
+        // };
+        // https://stackoverflow.com/a/9713078/12940893
+        xhr = new XMLHttpRequest();
+        xhr.open("POST", "http://localhost:3000/send", true);
+        xhr.setRequestHeader("Content-Type", "application/json");
+        
+        xhr.onreadystatechange = function() {
+          if(xhr.readyState == 4) {
+            console.log(xhr.responseText);
+            console.log(xhr.status);
+          }
+        }
 
         function send(x,y,speed,angle){
-            var data = {"x":x,"y":y,"speed":speed,"angle":angle};
-            data = JSON.stringify(data);
+            speedPerc = speed / 100;
+            rAngle = Math.PI / 180 * angle;
+            frontSpeed = speedPerc * Math.sin(Math.PI/2 - rAngle);
+            leftSpeed = speedPerc * Math.sin(7*Math.PI/6 - rAngle);
+            rightSpeed = speedPerc * Math.sin(11*Math.PI/6 - rAngle);
+            data = frontSpeed.toFixed(2) + " " + leftSpeed.toFixed(2) + " " + rightSpeed.toFixed(2);
             console.log(data);
-            connection.send(data);
+            json_data = JSON.stringify({"text": data});
+            console.log(json_data)
+            xhr.open("POST", "http://localhost:3000/send", true);
+            xhr.setRequestHeader("Content-Type", "application/json");
+            xhr.send(json_data);
+
         }
 
 
@@ -66,14 +86,11 @@ font-size: xx-large;">
             document.getElementById("angle").innerText = 0;
         });
 
-      
-
-
         var width, height, radius, x_orig, y_orig;
         function resize() {
             width = window.innerWidth;
-            radius = 200;
-            height = radius * 6.5;
+            height = window.innerHeight * 0.5;
+            radius = height / 6.5;
             ctx.canvas.width = width;
             ctx.canvas.height = height;
             background();
