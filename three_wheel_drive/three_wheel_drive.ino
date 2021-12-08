@@ -7,7 +7,7 @@ SoftwareSerial altSerial(2,3); // RX, TX
 Adafruit_MotorShield AFMS = Adafruit_MotorShield();
 // define motors
 Adafruit_DCMotor *frontMotor = AFMS.getMotor(2);
-Adafruit_DCMotor *leftMotor = AFMS.getMotor(3);
+Adafruit_DCMotor *leftMotor = AFMS.getMotor(1);
 Adafruit_DCMotor *rightMotor = AFMS.getMotor(4);
 
 String command = "";                                    // commands from the Python command line will be collected and parsed here
@@ -58,6 +58,8 @@ void parse_command() {
     motorspeeds update_command = {front_motor_speed, left_motor_speed, right_motor_speed};
 
     driveMotors(update_command);
+    
+    altSerial.println("Sent");
 }
 
 void driveMotors(motorspeeds speeds) {
