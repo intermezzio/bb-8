@@ -1,0 +1,2 @@
+sudo rfcomm release all
+

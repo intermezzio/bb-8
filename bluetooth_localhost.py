@@ -10,7 +10,7 @@ import serial
 LOCALHOST_PORT = 0xBB8 # 3000
 
 # port for bluetooth
-BLUETOOTH_PORT = "/dev/rfcomm1" # or "COM9", etc
+BLUETOOTH_PORT = "/dev/rfcomm0" # or "COM9", etc
 
 # baud rate
 BAUD_RATE = 9600
@@ -26,7 +26,7 @@ class RequestHandler(BaseHTTPRequestHandler):
     #     try:
     #         if self.path == "/last":
     #             with open("." + self.path, "r") as document:
-                    
+
     #                 self.send_response(200)
     #                 self.send_header("Content-type", "text/html")
     #                 self.end_headers()
@@ -42,9 +42,9 @@ class RequestHandler(BaseHTTPRequestHandler):
             if self.path == "/send":
                 length = int(self.headers.get("content-length"))
                 request = json.loads(self.rfile.read(length))
-                text = request["text"]
+                text = request["text"].strip() + "\n"
                 print("reads")
-                if text == "stop":
+                if text == "stop\n":
                     ser.close()
                     self.send_response(200)
                     self.end_headers()
@@ -63,10 +63,11 @@ class RequestHandler(BaseHTTPRequestHandler):
                 self.end_headers()
                 self.wfile.write(b"404 not found")
 
-        except:
+        except Exception as e:
             self.send_response(500)
             self.end_headers()
             self.wfile.write(b"500 internal server error")
+            print(e)
 
     def do_OPTIONS(self):
         self.send_response(204)
@@ -79,6 +80,7 @@ class RequestHandler(BaseHTTPRequestHandler):
 
 
 if __name__ == "__main__":
+    ser.open()
     print("Initializing server")
     httpd = HTTPServer(("0.0.0.0", LOCALHOST_PORT), RequestHandler)
     print("Serving on port %d" % LOCALHOST_PORT)
