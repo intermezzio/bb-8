@@ -7,10 +7,12 @@ SoftwareSerial altSerial(2,3); // RX, TX
 Adafruit_MotorShield AFMS = Adafruit_MotorShield();
 // define motors
 Adafruit_DCMotor *frontMotor = AFMS.getMotor(2);
-Adafruit_DCMotor *leftMotor = AFMS.getMotor(1);
+Adafruit_DCMotor *leftMotor = AFMS.getMotor(3);
 Adafruit_DCMotor *rightMotor = AFMS.getMotor(4);
 
 String command = "";                                    // commands from the Python command line will be collected and parsed here
+
+unsigned long timeOfLastCommand;
 
 struct motorspeeds {
   int frontMotorSpeed;
@@ -19,6 +21,8 @@ struct motorspeeds {
 };
 
 void setup() {
+  timeOfLastCommand = millis();
+  
   Serial.begin(9600);
   AFMS.begin();
   altSerial.begin(9600);
@@ -30,6 +34,12 @@ void setup() {
 
 void loop() {
   get_input();
+  if( (millis() - timeOfLastCommand) > 20000 ) {        // if it's been 20 seconds since a command was given
+    motorspeeds stop_command = {0, 0, 0};
+    driveMotors(stop_command);
+    Serial.println("Stopped due to inactivity");
+    timeOfLastCommand = millis();
+  }
 }
 
 void get_input() {
@@ -60,6 +70,8 @@ void parse_command() {
     driveMotors(update_command);
     
     altSerial.println("Sent");
+
+    timeOfLastCommand = millis();
 }
 
 void driveMotors(motorspeeds speeds) {
