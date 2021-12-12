@@ -9,9 +9,7 @@
     <link rel="stylesheet" type="text/css" href="test.css">
 </head>
 <body>
-    <h1>
-        Control BB-8
-    </h1>
+    <h1>Control BB-8</h1>
     <p>
         X: <span id="x_coordinate"> </span>
         Y: <span id="y_coordinate"> </span>
@@ -19,18 +17,9 @@
         Angle: <span id="angle"> </span>
     </p>
     <canvas id="canvas" name="game"></canvas>
+    <button onclick="sendStop();">Stop</button>
+
     <script>
-        // var connection = new WebSocket('ws://' + "192.168.4.1" + ':81/', ['arduino']);
-        // connection.onopen = function () {
-        //     connection.send('Connect ' + new Date());
-        // };
-        // connection.onerror = function (error) {
-        //     console.log('WebSocket Error ', error);
-        //     alert('WebSocket Error ', error);
-        // };
-        // connection.onmessage = function (e) {
-        //     console.log('Server: ', e.data);
-        // };
         // https://stackoverflow.com/a/9713078/12940893
         xhr = new XMLHttpRequest();
         xhr.open("POST", "http://localhost:3000/send", true);
@@ -57,6 +46,10 @@
             xhr.setRequestHeader("Content-Type", "application/json");
             xhr.send(json_data);
 
+        }
+
+        function sendStop() {
+            send(0,0,0,0);
         }
 
 
@@ -103,16 +96,16 @@
 
             ctx.beginPath();
             ctx.arc(x_orig, y_orig, radius + 20, 0, Math.PI * 2, true);
-            ctx.fillStyle = '#ECE5E5';
+            ctx.fillStyle = '#ebcb8b'; // nord 4
             ctx.fill();
         }
 
         function joystick(width, height) {
             ctx.beginPath();
             ctx.arc(width, height, radius, 0, Math.PI * 2, true);
-            ctx.fillStyle = '#F08080';
+            ctx.fillStyle = '#5e81ac'; // nord 10
             ctx.fill();
-            ctx.strokeStyle = '#F6ABAB';
+            ctx.strokeStyle = '#88c0d0'; // nord 8
             ctx.lineWidth = 8;
             ctx.stroke();
         }

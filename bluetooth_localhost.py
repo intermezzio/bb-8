@@ -5,6 +5,7 @@
 from http.server import HTTPServer, BaseHTTPRequestHandler
 import json
 import serial
+import time
 
 # port number for test server
 LOCALHOST_PORT = 0xBB8 # 3000
@@ -42,16 +43,18 @@ class RequestHandler(BaseHTTPRequestHandler):
             if self.path == "/send":
                 length = int(self.headers.get("content-length"))
                 request = json.loads(self.rfile.read(length))
-                text = request["text"].strip() + "\n"
+                text = request["text"].strip() + "\r\n"
                 print("reads")
-                if text == "stop\n":
+                if text == "stop\r\n":
                     ser.close()
                     self.send_response(200)
                     self.end_headers()
                     self.wfile.write(b"The arduino was stopped")
 
                 else:
-                    ser.write(text.encode())
+                    for char in text:
+                        ser.write(char.encode())
+                        time.sleep(0.02)
                     last_command = text
                     self.send_response(200)
                     self.end_headers()
